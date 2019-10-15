@@ -46,6 +46,8 @@ public class BankingDAO {
 		if (amount < 0)
 			throw new IllegalArgumentException("Le montant ne doit pas être négatif");
 	
+                
+                
 		String sql = "UPDATE Account SET Total = Total + ? WHERE CustomerID = ?";
 		try (	Connection myConnection = myDataSource.getConnection();
 			PreparedStatement statement = myConnection.prepareStatement(sql)) {
@@ -56,13 +58,17 @@ public class BankingDAO {
 				statement.setFloat( 1, amount * -1);
 				statement.setInt(2, fromID);
 				int numberUpdated = statement.executeUpdate();
-
+                                if (numberUpdated == 0){
+                                    throw new Exception("Le débité n'existe pas");
+                                }
 				// On crédite le 2° client
 				statement.clearParameters();
 				statement.setFloat( 1, amount);
 				statement.setInt(2, toID);
 				numberUpdated = statement.executeUpdate();
-
+                                if (numberUpdated == 0){
+                                    throw new Exception("Le crédité n'existe pas");
+                                }
 				// Tout s'est bien passé, on peut valider la transaction
 				myConnection.commit();
 			} catch (Exception ex) {
@@ -73,5 +79,5 @@ public class BankingDAO {
 				myConnection.setAutoCommit(true);				
 			}
 		}
-	}
+	}       
 }
